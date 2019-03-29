@@ -1,20 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "grep.h"
+#include "parcer.h"
 
-# define MAX_NUMBER_OF_ARGUMENTS 10
+# define MAX_NUMBER_OF_FLAGS 8
 
 int main(int argc, char** argv){
-	char program_input[argc - 1];
-	ProgramProperties* our_properties = createProgramProperties();
-	int number_of_arguments = argc-1;
-	if number_of_arguments == 1{
-		our_properties->
+	char* file_to_read_from = NULL; char* string_to_search = NULL;
+	int program_flags[MAX_NUMBER_OF_FLAGS] = {0};
+	get_program_properties(&file_to_read_from, &string_to_search, program_flags, argc-1, argv);
+	ProgramProperties* our_properties = createProgramProperties(file_to_read_from,
+																string_to_search, program_flags);
+	if(our_properties == NULL){
+		exit(EXIT_FAILURE);
 	}
-	int i;
-	for(i=0; i<argc; i++){
-		if
+	if(grep_on_file(our_properties)){
+		free(our_properties);
+		exit(EXIT_SUCCESS);
 	}
-
-	return 0;
+	free(our_properties);
+	exit(EXIT_FAILURE);
 }
