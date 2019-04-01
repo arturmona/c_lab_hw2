@@ -1,16 +1,26 @@
 #ifndef GREP_H
 #define GREP_H
 
-#define ALSO_PRINT_LINE_NUMBER 0
-#define IGNORE_UPPER_LOWER_CASE 1
-#define PRINT_NUM_LINES_AFTER_MATCH 2
-#define PRINT_FILE_OFFSET_TO_LINE 3
-#define ONLY_PRINT_NUM_OF_MATCHED_LINES 4
-#define PRINT_ONLY_STRICT_MATCH 5
-#define PRINT_ONLY_LINES_NOT_MATCHING 6
-#define USE_REGULAR_EXPRESSIONS 7
+
 
 /**** struct for all possible program properties ****/
+typedef  struct Parsed_pattern{
+	int type;
+	char the_char;
+	char * string;
+	char  char_start;
+	char  char_end;
+}Parsed_pattern;
+
+typedef struct Lines{
+	char current_line[30];
+	int offset;
+	int num_of_bytes;
+	int line;
+	int print_next_line;
+	int match_lines;
+}Lines;
+
 typedef struct ProgramProperties{
 	char* file_to_read_from;
 	char* string_to_search;
@@ -19,13 +29,14 @@ typedef struct ProgramProperties{
 	int print_num_lines_after_match; /*A NUM*/
 	int print_file_offset_to_line; /*b*/
 	int only_print_num_of_matched_lines; /*c*/
-    int print_only_strict_match; /*x*/
-    int print_only_lines_not_matching; /*v*/
-    int use_regular_expressions; /*E*/
+	int print_only_strict_match; /*x*/
+	int print_only_lines_not_matching; /*v*/
+	int use_regular_expressions; /*E*/
 } ProgramProperties;
 
 /************** function declarations **************/
+
 ProgramProperties* createProgramProperties(char* file_to_read_from, char* string_to_search, int* flags);
 int grep_on_file(ProgramProperties* program_properties);
-
+void get_program_properties(ProgramProperties *  programProperties,int number_of_program_arguments, char** program_arguments);
 #endif /* GREP_H */

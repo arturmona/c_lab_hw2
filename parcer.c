@@ -11,12 +11,7 @@ void to_lower_case(char* word) {
     }
 }
 
-/*
- * we did not split set_program_properties to several functions
- * because it makes more sencse and it is better understood if keeping it as one.
- */
-void get_program_properties(char** file_to_read_from, char** string_to_search, int* flags,
-                            int number_of_program_arguments, char** program_arguments){
+void get_program_properties(ProgramProperties* programProperties,int number_of_program_arguments, char** program_arguments){
     int index, set_string_to_search_flag = 0;
     for(index=1; index < number_of_program_arguments+1; index++){
         if(!strcmp(program_arguments[index],"-i")){
@@ -44,14 +39,9 @@ void get_program_properties(char** file_to_read_from, char** string_to_search, i
         else if(!strcmp(program_arguments[index], "-E")){
             flags[USE_REGULAR_EXPRESSIONS] = 1;
         }
-        else if(index < number_of_program_arguments){
-            /*then the argument is the string_to_search*/
-            *string_to_search = program_arguments[index];
-            set_string_to_search_flag = 1;
-        }
         else if(set_string_to_search_flag == 0){
-            /*at this point index == number_of_program_arguments*/
             *string_to_search = program_arguments[index];
+            set_string_to_search_flag=1;
         }
         else{
             *file_to_read_from = program_arguments[index];
