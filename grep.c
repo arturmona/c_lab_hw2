@@ -13,14 +13,13 @@
 #define FAILURE 0
 
 
-int init_lines_struct(Lines * lines){
+void init_lines_struct(Lines * lines){
 	lines->current_line=NULL;
 	lines->match_lines = 0;
 	lines->print_next_line = 0;
 	lines->num_of_bytes=0;
 	lines->line=0;
 	lines->offset=0;
-
 }
 
 void to_lower_case(char* word) {
@@ -81,24 +80,24 @@ int check_special_chars(char  a_char){
 
 int parse_pattern(Parsed_pattern * parsed_pattern,char * pattern,int regular) {
 	int parsed_pattern_index = 0, pattern_index;
-	Parsed_pattern *curren_parsed_pattern_ptr;
+	Parsed_pattern *current_parsed_pattern_ptr;
 	for (pattern_index = 0; pattern[pattern_index] != '\0'; pattern_index++, parsed_pattern_index++) {
-		curren_parsed_pattern_ptr=&parsed_pattern[parsed_pattern_index];
+		current_parsed_pattern_ptr=&parsed_pattern[parsed_pattern_index];
 		if (pattern[pattern_index] == '\\') {
 			if (check_special_chars(pattern[pattern_index + 1])) {
 				pattern_index += 1;
 			}
 			initialize_type_REGULAR_CHAR(parsed_pattern, pattern[pattern_index]);
 		} else if (pattern[pattern_index] == '.' && regular) {
-			initialize_type_DOT(curren_parsed_pattern_ptr);
+			initialize_type_DOT(current_parsed_pattern_ptr);
 
 		} else if (pattern[pattern_index] == '[' && regular) {
-			initialize_type_SQUARE_BRACKETS(curren_parsed_pattern_ptr, pattern[pattern_index + 1], pattern[pattern_index + 3]);
+			initialize_type_SQUARE_BRACKETS(current_parsed_pattern_ptr, pattern[pattern_index + 1], pattern[pattern_index + 3]);
 			pattern_index += 4;
-		} else if (pattern[pattern_index] == '(' & regular) {
-			pattern_index = initialize_type_ROUND_BRACKETS(curren_parsed_pattern_ptr, pattern);
+		} else if (pattern[pattern_index] == '(' && regular) {
+			pattern_index = initialize_type_ROUND_BRACKETS(current_parsed_pattern_ptr, pattern);
 		} else if (!check_special_chars(pattern[pattern_index]))
-			initialize_type_REGULAR_CHAR(curren_parsed_pattern_ptr, pattern[pattern_index]);
+			initialize_type_REGULAR_CHAR(current_parsed_pattern_ptr, pattern[pattern_index]);
 		else {
 			parsed_pattern_index--;
 		}
@@ -113,7 +112,7 @@ void get_program_properties(ProgramProperties*  programProperties, int number_of
 		if (!strcmp(program_arguments[index], "-i")) {
 			programProperties->ignore_upper_lower_case = 1;
 		} else if (!strcmp(program_arguments[index], "-n")) {
-			programProperties->also_print_line_number;
+			programProperties->also_print_line_number=1;
 		} else if (!strcmp(program_arguments[index], "-A")) {
 			programProperties->print_num_lines_after_match = atoi(program_arguments[index + 1]);
 			index++;
@@ -136,24 +135,26 @@ void get_program_properties(ProgramProperties*  programProperties, int number_of
 	}
 }
 
-int find_delimiter(char * pattern) {
-	int index = -1;
-	for (index = 0; index < strlen(pattern); index++) {
-		if (pattern[index] == '|' && (index == 0 || pattern[index - 1] != '\\')) {
-			pattern[index] = '\0';
-			break;
-		}
-		return index;
-	}
-}
+//int find_delimiter(char * pattern) {
+//	unsigned int index = -1;
+//	for (index = 0; index < strlen(pattern); index++) {
+//		if (pattern[index] == '|' && (index == 0 || pattern[index - 1] != '\\')) {
+//			pattern[index] = '\0';
+//			break;
+//		}
+//		return index;
+//	}
+//}
 
 int find_match(char * string,Parsed_pattern * parsedPattern,int size,int strict_match, int skipped_chars) {
-	int index, pos,match=0;
-	char * word;
+	unsigned int index;
+	int pos;
+	int match=0;
 	for (index = 0; index < strlen(string); index++) {
 		for (pos = 0; pos < size&&pos+index<strlen(string); pos++) {
-			if (parsedPattern[pos].type == REGULAR_CHAR && parsedPattern[pos].the_char != string[index + pos])
+			if (parsedPattern[pos].type == REGULAR_CHAR && parsedPattern[pos].the_char != string[index + pos]) {
 				break;
+			}
 			if (parsedPattern[pos].type == DOT)
 				continue;
 			if (parsedPattern[pos].type == SQUARE_BRACKETS && (parsedPattern[pos].char_start > string[pos + index] ||
@@ -161,15 +162,12 @@ int find_match(char * string,Parsed_pattern * parsedPattern,int size,int strict_
 				break;
 			}
 			if (parsedPattern[pos].type == ROUND_BRACKETS) {
-				while(word!=NULL){
-
-				}
 
 			}
 		}
 		if(strict_match) {
 			if ((pos >= size && pos + index >= strlen(string))&&!skipped_chars) {
-				match = 1;
+				match=1;
 				break;
 			}
 		}
@@ -196,7 +194,7 @@ int check_match(ProgramProperties* program_properties,Lines * lines){
 	return match;
 }
 
-int print_matches(ProgramProperties * programProperties,Lines * lines ,char Delimiter){
+void print_matches(ProgramProperties * programProperties,Lines * lines ,char Delimiter){
 	if(programProperties->also_print_line_number)
 		printf("%d%c", lines->line,Delimiter);
 
@@ -241,7 +239,7 @@ int grep_on_file(ProgramProperties* program_properties) {
 			return FAILURE;
 		}
 	}
-	while ((amount_chars_read = getline(lines.current_line, &line_lenght, file)) != -1) {
+	while ((amount_chars_read = getline(&lines.current_line, &line_lenght, file)) != -1) {
 		grep_line(program_properties, &lines);
 		lines.line++;
 		lines.num_of_bytes += amount_chars_read;

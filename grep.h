@@ -13,7 +13,7 @@ typedef  struct Parsed_pattern{
 }Parsed_pattern;
 
 typedef struct Lines{
-	char current_line[30];
+	char * current_line;
 	int offset;
 	int num_of_bytes;
 	int line;
