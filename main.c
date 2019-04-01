@@ -1,3 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "grep.h"
+#include "parcer.h"
+
 int main(int argc, char** argv){
 	int success;
 	ProgramProperties* our_properties = calloc(1, sizeof(ProgramProperties));
