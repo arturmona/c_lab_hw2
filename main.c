@@ -4,7 +4,7 @@
 
 
 int main(int argc, char** argv){
-	ProgramProperties* our_properties = calloc(1, sizeof(ProgramProperties));
+	GrepProperties* our_properties = calloc(1, sizeof(GrepProperties));
 	if(our_properties == NULL){
 		exit(EXIT_FAILURE);
 	}
