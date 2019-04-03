@@ -1,12 +1,7 @@
 #ifndef GREP_H
 #define GREP_H
 
-#include "grep_utilities.h"
-
-
-
 /**** struct for all possible program properties ****/
-
 typedef struct GrepProperties{
 	char* file_to_read_from;
 	char* pattern;
@@ -21,8 +16,8 @@ typedef struct GrepProperties{
 } GrepProperties;
 
 /************** function declarations **************/
-
 int grep_on_file(GrepProperties* grepProperties);
-void get_program_properties(GrepProperties *  grepProperties,int num_of_args, char** program_arguments);
+void get_grep_properties(GrepProperties*  grepProperties,
+						 int num_of_args, char** program_arguments);
 
 #endif /* GREP_H */
