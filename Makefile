@@ -17,4 +17,4 @@ all:
 	gcc -Wextra -Wall -o my_grep main.c grep.c grep_utilities.c
 	chmod 755 my_grep
 test:
-	~nimrodav/grep_tests/beta1.sh
+	~nimrodav/grep_tests/run_all.sh

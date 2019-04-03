@@ -92,15 +92,16 @@ int find_match(GrepProperties* grep_properties, char* line,
 		match_chars = 0;
 		for (pos = 0; pos < parsedPattern_size && pos+index<strlen(line) && match; pos++) {
 			if (parsedPattern[pos].type == REGULAR_CHAR && grep_properties->ignore_upper_lower_case) {
-				match=tolower(line[pos+index]) == tolower(parsedPattern[pos].the_char);
+				match = (tolower(line[pos+index]) == tolower(parsedPattern[pos].the_char));
 			}
 			else if (parsedPattern[pos].type == REGULAR_CHAR){
-				match=line[pos+index] == parsedPattern[pos].the_char;
+				match = (line[pos+index] == parsedPattern[pos].the_char);
 			}
 			else if (parsedPattern[pos].type == SQUARE_BRACKETS){
-				match=parsedPattern[pos].char_start <= line[pos+index]&&parsedPattern[pos].char_end <= line[pos+index];
+				match = (parsedPattern[pos].char_start <= line[pos+index] && parsedPattern[pos].char_end >= line[pos+index]);
 			}
 			else if (parsedPattern[pos].type == ROUND_BRACKETS) {
+				/*TODO: add a recursive function*/
 			}
 			match_chars += match;
 		}
