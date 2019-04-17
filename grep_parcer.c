@@ -9,7 +9,7 @@
 #define NOT_USED_CHAR 'c'
 
 void cut_pattern(char* pattern_to_cut, int index_to_cut_from, int lenght_to_cut){
-    int pattern_size = strlen(pattern_to_cut);
+    size_t pattern_size = strlen(pattern_to_cut);
     memmove(pattern_to_cut + index_to_cut_from,
             pattern_to_cut + index_to_cut_from + lenght_to_cut + 1, pattern_size - lenght_to_cut);
     pattern_to_cut[pattern_size - lenght_to_cut + 1] = '\0';
@@ -29,7 +29,7 @@ void safely_add_node_to_parsed_pattern(ParsedPattern* parsed_pattern, ParsedPatt
 }
 
 void set_all_pattern_options(char* all_patterns_combined, ParsedPatternNode* node){
-	int pattern_index = 1;
+    int pattern_index = 1;
     if(node->number_of_round_brackets_options == 1){
         node->round_brackets_options_array[0] = malloc(strlen(all_patterns_combined)+1);
         strcpy(node->round_brackets_options_array[0] ,all_patterns_combined);
@@ -62,7 +62,7 @@ void initialize_sqaure_brackets_node(ParsedPatternNode* node, char start, char e
 void initialize_round_brackets_node(ParsedPatternNode* node, char* pattern){
     int allocation_index;
     char* pattern_copy = malloc(strlen(pattern)+1);
-	strcpy(pattern_copy, pattern);
+    strcpy(pattern_copy, pattern);
     node->number_of_checked_round_brackets_options = 0;
     node->round_brackets_content_size = 0;
     node->number_of_round_brackets_options = 0;
@@ -103,14 +103,18 @@ ParsedPatternNode* addParsedPatternNode(ParsedPattern* parsed_pattern, char* pat
         return NULL;
     }
     safely_add_node_to_parsed_pattern(parsed_pattern, new_node);
-    if(node_type == REGULAR_CHAR)
+    if(node_type == REGULAR_CHAR) {
         initialize_regular_char_node(new_node, regular_char);
-    else if(node_type == DOT)
+    }
+    else if(node_type == DOT) {
         initialize_dot_node(new_node);
-    else if(node_type == SQUARE_BRACKETS)
+    }
+    else if(node_type == SQUARE_BRACKETS) {
         initialize_sqaure_brackets_node(new_node, square_brackets_start_char, square_brackets_end_char);
-    else
+    }
+    else {
         initialize_round_brackets_node(new_node, pattern);
+    }
     return new_node;
 }
 
@@ -147,7 +151,7 @@ int check_special_chars(char char_to_check){
         (char_to_check == '|') || (char_to_check == '.') ||
         (char_to_check == '[') || (char_to_check == ']') ||
         (char_to_check == '{') || (char_to_check == '}')){
-            return FOUND;
+        return FOUND;
     }
     return NOT_FOUND;
 }
@@ -156,40 +160,40 @@ int set_parsed_pattern_values(ParsedPattern* parsed_pattern, char* pattern, int 
     int pattern_index, advance_index_by_round_brackets_flag;
     ParsedPatternNode* node;
     for (pattern_index = 0; pattern[pattern_index] != '\0'; pattern_index++){
-		advance_index_by_round_brackets_flag = 0;
+        advance_index_by_round_brackets_flag = 0;
         if (pattern[pattern_index] == '\\'){
-          if (!check_special_chars(pattern[pattern_index + 1])){
-            pattern_index += 1;
-            node = addParsedPatternNode(parsed_pattern ,pattern, REGULAR_CHAR, pattern[pattern_index],
-                                        NOT_USED_CHAR, NOT_USED_CHAR);
-          }
+            if (!check_special_chars(pattern[pattern_index + 1])){
+                pattern_index += 1;
+                node = addParsedPatternNode(parsed_pattern ,pattern, REGULAR_CHAR, pattern[pattern_index],
+                                            NOT_USED_CHAR, NOT_USED_CHAR);
+            }
         }
-		else if ((pattern[pattern_index] == '.') && use_regular_expressions){
-			node = addParsedPatternNode(parsed_pattern ,pattern, DOT, NOT_USED_CHAR,
+        else if ((pattern[pattern_index] == '.') && use_regular_expressions){
+            node = addParsedPatternNode(parsed_pattern ,pattern, DOT, NOT_USED_CHAR,
                                         NOT_USED_CHAR, NOT_USED_CHAR);
-		}
-		else if ((pattern[pattern_index] == '[') && use_regular_expressions){
-			node = addParsedPatternNode(parsed_pattern ,pattern, SQUARE_BRACKETS, NOT_USED_CHAR,
+        }
+        else if ((pattern[pattern_index] == '[') && use_regular_expressions){
+            node = addParsedPatternNode(parsed_pattern ,pattern, SQUARE_BRACKETS, NOT_USED_CHAR,
                                         pattern[pattern_index + 1], pattern[pattern_index + 3]);
-			pattern_index += SQUARE_BRACKETS_SIZE_BYTES;
-		}
-		else if ((pattern[pattern_index] == '(') && use_regular_expressions){
+            pattern_index += SQUARE_BRACKETS_SIZE_BYTES;
+        }
+        else if ((pattern[pattern_index] == '(') && use_regular_expressions){
             cut_pattern(pattern, 0, pattern_index);
             node = addParsedPatternNode(parsed_pattern ,pattern, ROUND_BRACKETS, NOT_USED_CHAR,
                                         NOT_USED_CHAR, NOT_USED_CHAR);
-			advance_index_by_round_brackets_flag = 1;
-		}
-		else{
+            advance_index_by_round_brackets_flag = 1;
+        }
+        else{
             node = addParsedPatternNode(parsed_pattern ,pattern, REGULAR_CHAR, pattern[pattern_index],
                                         NOT_USED_CHAR, NOT_USED_CHAR);
-		}
+        }
         if (node == NULL){
             return FAILURE;
         }
         if (advance_index_by_round_brackets_flag){
             pattern_index += node->round_brackets_content_size - pattern_index + 1;
         }
-	}
+    }
     return SUCCESS;
 }
 
@@ -216,26 +220,3 @@ void to_lower_case(char* word) {
     }
 }
 
-/*
-void pattern_to_lower_case(ParsedPattern* parsed_pattern){
-    int round_brackets_index;
-    ParsedPatternNode* pattern_node = parsed_pattern->start;
-    while(pattern_node != NULL){
-        if(pattern_node->type == REGULAR_CHAR){
-            pattern_node->regular_char = tolower(pattern_node->regular_char);
-        }
-        else if(pattern_node->type == SQUARE_BRACKETS){
-            pattern_node->square_brackets_start_char = tolower(pattern_node->square_brackets_start_char);
-            pattern_node->square_brackets_end_char = tolower(pattern_node->square_brackets_end_char);
-        }
-        else if(pattern_node->type == ROUND_BRACKETS){
-            for(round_brackets_index = 0;
-                round_brackets_index < pattern_node->number_of_round_brackets_options;
-                round_brackets_index++){
-                    to_lower_case(pattern_node->round_brackets_options_array[round_brackets_index]);
-            }
-        }
-        pattern_node = pattern_node->next;
-    }
-}
-*/
