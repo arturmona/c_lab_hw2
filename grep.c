@@ -10,6 +10,13 @@
 #define DOTS ':'
 #define HYPHEN '-'
 
+typedef struct LinesToGrep{
+    char* current_line;
+    int current_row_number;
+    int num_of_bytes_before_current_line;
+    int num_of_lines_to_print;
+    int num_of_matched_lines;
+}LinesToGrep;
 
 void initializeLinesToGrep(LinesToGrep* lines){
     lines->current_line = NULL;
@@ -30,50 +37,52 @@ void print_matches(GrepProperties* grep_properties, LinesToGrep* lines , char De
     printf("%s",lines->current_line);
 }
 
-int try_backtrack_in_round_brackets(ParsedPatternNode **pattern_node,
-                                             ParsedPatternNode **pattern_end){
+int try_backtrack_in_round_brackets(ParsedPatternNode** pattern_node){
     //printf("in try_backtrack_in_round_brackets\n");
-    ParsedPatternNode *temp;
+    ParsedPatternNode* temp = (*pattern_node)->prev;
     int byte_amount_to_backtrack = 0;
-    if((*pattern_node) == NULL){
-        temp = (*pattern_end);
-    }
-    else{
-        temp = (*pattern_node)->prev;
-    }
     while(temp != NULL){
         if((temp->type == ROUND_BRACKETS) &&
            (temp->number_of_checked_round_brackets_options < temp->number_of_round_brackets_options)){
             byte_amount_to_backtrack += \
-			   strlen(temp->round_brackets_options_array[temp->number_of_checked_round_brackets_options]);
+			   strlen(temp->round_brackets_options_array[temp->number_of_checked_round_brackets_options-1]);
             (*pattern_node) = temp;
             //printf("went back %d bytes\n", byte_amount_to_backtrack);
             return byte_amount_to_backtrack;
-        }
-        byte_amount_to_backtrack++;
-        temp = temp->prev;
+        } else if(temp->type == ROUND_BRACKETS){
+			byte_amount_to_backtrack += \
+			   strlen(temp->round_brackets_options_array[temp->number_of_checked_round_brackets_options-1]);
+ 	
+		} else {
+			byte_amount_to_backtrack++;
+		}
+		temp = temp->prev;
     }
     //printf("went back 0 bytes\n");
     return FAILURE;
 }
 
-int check_for_match_in_round_brackets(ParsedPatternNode *node, char *line_to_search){
+int check_for_match_in_round_brackets(ParsedPatternNode* node, char* line_to_search){
     //printf("in check_for_match_in_round_brackets\n");
     //printf("line is: %s\n", line_to_search);
     int search_index;
     size_t bracket_option_size;
-    size_t line_to_search_lenght = strlen(line_to_search);
+    size_t line_to_search_lenght = strlen(line_to_search) - 1;
+	if((int)line_to_search_lenght == -1){
+			exit(EXIT_FAILURE);
+		}
     for(search_index = node->number_of_checked_round_brackets_options;
         search_index < node->number_of_round_brackets_options;
         search_index++){
         bracket_option_size = strlen(node->round_brackets_options_array[search_index]);
         //printf("comparing: %s with %s\n",node->round_brackets_options_array[search_index], line_to_search);
-        //printf("%d , %d\n", line_to_search_lenght, bracket_option_size);
+        //printf("line_to_search_lenght: %d , bracket_option_size: %d\n", line_to_search_lenght, bracket_option_size);
         if((line_to_search_lenght >= bracket_option_size) &&
            (!strncmp(node->round_brackets_options_array[search_index],
                      line_to_search, bracket_option_size))){
             search_index++;
             node->number_of_checked_round_brackets_options = search_index;
+			//printf("found match in op number %d\n", search_index-1);
             //printf("return is %d\n", bracket_option_size);
             return (int)bracket_option_size;
         }
@@ -82,41 +91,44 @@ int check_for_match_in_round_brackets(ParsedPatternNode *node, char *line_to_sea
     return NOT_FOUND;
 }
 
-unsigned int search_pattern_recursively(ParsedPatternNode **pattern_node,
-                                        int *matched_chars, char *line_to_search,
-                                        const unsigned int *search_index){
+unsigned int search_pattern_recursively(ParsedPatternNode** pattern_node,
+                                        int* matched_chars, char* line_to_search,
+                                        int* search_index){
     //printf("in search_pattern_recursively.\n");
 
     size_t line_size = strlen(line_to_search) - 1;
     //printf("search_index: %d ,line_size: %d, line: %s\n", *search_index, line_size, line_to_search);
-    while(((*pattern_node) != NULL) && matched_chars && ((*search_index) < line_size)){
+    while(((*pattern_node) != NULL) && (*matched_chars) && ((*search_index) < (int)line_size)){
         if ((*pattern_node)->type == REGULAR_CHAR){
             *matched_chars = (line_to_search[(*search_index)] == (*pattern_node)->regular_char);
             //printf("matching node char: %c with: %c return is %d\n", (*pattern_node)->regular_char,
-            //line_to_search[(*search_index)], *matched_chars);
-        }
-        else if((*pattern_node)->type == DOT){
+            		//line_to_search[(*search_index)], *matched_chars);
+        } else if((*pattern_node)->type == DOT){
             *matched_chars = 1;
             //printf("matched dot\n");
-        }
-        else if ((*pattern_node)->type == SQUARE_BRACKETS){
+        } else if ((*pattern_node)->type == SQUARE_BRACKETS){
             *matched_chars = ((*pattern_node)->square_brackets_start_char <= line_to_search[(*search_index)] &&
                               (*pattern_node)->square_brackets_end_char >= line_to_search[(*search_index)]);
             //printf("matched sr char: %c is %d\n", line_to_search[(*search_index)], *matched_chars);
-        }
-        else if ((*pattern_node)->type == ROUND_BRACKETS) {
+        } else if ((*pattern_node)->type == ROUND_BRACKETS) {
+			//printf("matching from ROUND_BRACKETS\n");
+			if((*search_index)==-15){
+				exit(EXIT_FAILURE);
+			}
             *matched_chars = check_for_match_in_round_brackets((*pattern_node), line_to_search+(*search_index));
         }
-        search_index += (*matched_chars);
-        //printf("updated index: %d\n", (*search_index));
-        (*pattern_node) = (*pattern_node)->next;
+        (*search_index) += (*matched_chars);
+		if ((*matched_chars)){
+			//printf("updated index: %d\n", (*search_index));
+			(*pattern_node) = (*pattern_node)->next;
+		}
     }
     return (*search_index);
 }
 
-void initilize_recursion_flags(ParsedPattern *parsed_pattern){
+void initilize_recursion_flags(ParsedPattern* parsed_pattern){
     //printf("in initilize_recursion_flags\n");
-    ParsedPatternNode *pattern_node = parsed_pattern->start;
+    ParsedPatternNode* pattern_node = parsed_pattern->start;
     while(pattern_node != NULL){
         if(pattern_node->type == ROUND_BRACKETS){
             pattern_node->number_of_checked_round_brackets_options = 0;
@@ -126,22 +138,24 @@ void initilize_recursion_flags(ParsedPattern *parsed_pattern){
 }
 
 int find_pattern_in_line(GrepProperties* grep_properties, char* line, ParsedPattern* parsed_pattern){
-    int continue_search_flag;
-    unsigned int total_matched_chars, search_index, line_index = 0;
-    unsigned int iteration_found_match, line_size, backtrack_round_brackets;
+    //printf("in find_pattern_in_line\n");
+	int continue_search_flag, total_matched_chars, iteration_found_match, search_index, line_index = 0, 
+		line_size, backtrack_round_brackets;
     ParsedPatternNode* pattern_node;
     char* line_copy = malloc(strlen(line)+1);
     strcpy(line_copy, line);
     if(grep_properties->ignore_upper_lower_case){
         to_lower_case(line_copy);
     }
-    line_size = strlen(line)-1;
+    line_size = (int)(strlen(line)-1);
+	//printf("line size: %d\n", line_size);
     while (line_index < line_size) {
         pattern_node = parsed_pattern->start;
-        iteration_found_match = 1; total_matched_chars = 0; search_index = 0;
+        total_matched_chars = 0; search_index = 0;
         initilize_recursion_flags(parsed_pattern);
         continue_search_flag = ON;
         while(continue_search_flag){
+			iteration_found_match = 1;
             total_matched_chars = search_pattern_recursively(&pattern_node, &iteration_found_match,
                                                              line_copy+line_index, &search_index);
             if ((grep_properties->print_only_strict_match == ON) && (iteration_found_match) &&
@@ -151,9 +165,11 @@ int find_pattern_in_line(GrepProperties* grep_properties, char* line, ParsedPatt
             } else if (pattern_node == NULL && iteration_found_match){
                 free(line_copy);
                 return FOUND;
-            }
-            if((backtrack_round_brackets = \
-				try_backtrack_in_round_brackets(&pattern_node, &parsed_pattern->end)) == 0){
+            } else if (total_matched_chars == line_size && pattern_node != NULL){
+				free(line_copy);
+                return NOT_FOUND;				
+			}
+            if ((backtrack_round_brackets = try_backtrack_in_round_brackets(&pattern_node)) == 0){
                 continue_search_flag = OFF;
                 line_index++;
             } else{
@@ -223,7 +239,7 @@ int grep_on_file(GrepProperties* grep_properties) {
         }
         node = node->next;
     }
-    */
+	*/
     initializeLinesToGrep(&lines);
     if (grep_properties->file_to_read_from == NULL) {
         file = stdin;
