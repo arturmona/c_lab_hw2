@@ -5,17 +5,22 @@
 #include "grep_parcer.h"
 
 #define SQUARE_BRACKETS_INNER_SIZE_BYTES 4
+#define CLOSING_BRACKET_SIZE_BYTES 1
+#define OPENING_SQUARE_BRACKET '['
+#define OPENING_ROUND_BRACKET '('
+#define DOT '.'
 #define DELIMITER "|"
 #define NOT_USED_CHAR 'c'
 
-void cut_pattern(char* pattern_to_cut, int index_to_cut_from, int lenght_to_cut){
-    //printf("in cut_pattern\n");
-    //printf("pattern before: %s\n", pattern_to_cut);    
+void cut_pattern_start(char* pattern_to_cut, int start_index_of_kept_pattern){
+    printf("in cut_pattern\n");
+    printf("pattern before: %s\n", pattern_to_cut);    
     size_t pattern_size = strlen(pattern_to_cut);
-    memmove(pattern_to_cut + index_to_cut_from,
-            pattern_to_cut + index_to_cut_from + lenght_to_cut + 1, pattern_size - lenght_to_cut);
-    pattern_to_cut[pattern_size - lenght_to_cut ] = '\0';
-    //printf("pattern after: %s\n", pattern_to_cut);
+    size_t new_pattern_size = pattern_size - start_index_of_kept_pattern;
+    //printf("pattern size is %d, index to cut from: %d, lenght_to_cut: %d\n", pattern_size, index_to_cut_from,lenght_to_cut);
+    memmove(pattern_to_cut, pattern_to_cut + start_index_of_kept_pattern, new_pattern_size);
+    pattern_to_cut[new_pattern_size] = '\0';
+    printf("pattern after: %s\n", pattern_to_cut);
 }
 
 void safely_add_node_to_parsed_pattern(ParsedPattern* parsed_pattern, ParsedPatternNode* node){
@@ -34,14 +39,16 @@ void safely_add_node_to_parsed_pattern(ParsedPattern* parsed_pattern, ParsedPatt
 void set_all_pattern_options(char* all_patterns_combined, ParsedPatternNode* node){
     int pattern_index = 1;
     if(node->number_of_round_brackets_options == 1){
-        node->round_brackets_options_array[0] = malloc(strlen(all_patterns_combined)+1);
+        //node->round_brackets_options_array[0] = malloc(strlen(all_patterns_combined)+1);
         strcpy(node->round_brackets_options_array[0] ,all_patterns_combined);
     }
     else{
+        //node->round_brackets_options_array[pattern_index-1] = malloc(strlen(all_patterns_combined));
         strcpy(node->round_brackets_options_array[pattern_index-1],
                strtok(all_patterns_combined, DELIMITER));
         while(pattern_index < node->number_of_round_brackets_options){
             pattern_index++;
+            //node->round_brackets_options_array[pattern_index-1] = malloc(strlen(all_patterns_combined));
             strcpy(node->round_brackets_options_array[pattern_index-1], strtok(NULL, DELIMITER));
         }
     }
@@ -66,6 +73,7 @@ void initialize_round_brackets_node(ParsedPatternNode* node, char* pattern){
     //printf("in initialize_round_brackets_node\n");
     int allocation_index;
     char* pattern_copy = malloc(strlen(pattern)+1);
+    //pattern_copy[strlen(pattern)] = '\0';
     strcpy(pattern_copy, pattern);
     node->number_of_checked_round_brackets_options = 0;
     node->round_brackets_content_size_bytes = 0;
@@ -77,11 +85,21 @@ void initialize_round_brackets_node(ParsedPatternNode* node, char* pattern){
         node->round_brackets_content_size_bytes++;
     }
     node->number_of_round_brackets_options++;
-    cut_pattern(pattern_copy, node->round_brackets_content_size_bytes,
-                (int)strlen(pattern) - node->round_brackets_content_size_bytes);
-    node->round_brackets_options_array = malloc(node->number_of_round_brackets_options);
+    printf("test!\n");
+    printf("pattern before: %s\n", pattern_copy);
+    //cut_pattern(pattern_copy, node->round_brackets_content_size_bytes,
+    //            (int)strlen(pattern) - node->round_brackets_content_size_bytes);
+    pattern_copy[node->round_brackets_content_size_bytes] = '\0';
+    printf("pattern after: %s\n", pattern_copy);
+    //printf("pattern after size: %d\n", strlen(pattern_copy));
+    //printf("node->number_of_round_brackets_options: %d\n", node->number_of_round_brackets_options);
+    //printf("node->round_brackets_content_size_bytes: %d\n", node->round_brackets_content_size_bytes);
+    node->round_brackets_options_array = malloc(sizeof(char*) * (node->number_of_round_brackets_options + 1));
+    node->round_brackets_options_array[node->number_of_round_brackets_options] = '\0';
     for(allocation_index=0; allocation_index < node->number_of_round_brackets_options; allocation_index++){
-        node->round_brackets_options_array[allocation_index] = malloc(node->round_brackets_content_size_bytes + 1);
+        node->round_brackets_options_array[allocation_index] = malloc(sizeof(char*) * 
+                                                               (node->round_brackets_content_size_bytes + 1));
+        node->round_brackets_options_array[allocation_index][node->round_brackets_content_size_bytes] = '\0';
     }
     set_all_pattern_options(pattern_copy, node);
     node->type = ROUND_BRACKETS;
@@ -172,17 +190,17 @@ int set_parsed_pattern_values(ParsedPattern* parsed_pattern, char* pattern, int 
             node = addParsedPatternNode(parsed_pattern ,pattern, REGULAR_CHAR, pattern[pattern_index],
                                         NOT_USED_CHAR, NOT_USED_CHAR);
         }
-        else if ((pattern[pattern_index] == '.') && use_regular_expressions){
+        else if ((pattern[pattern_index] == DOT) && use_regular_expressions){
             node = addParsedPatternNode(parsed_pattern ,pattern, DOT, NOT_USED_CHAR,
                                         NOT_USED_CHAR, NOT_USED_CHAR);
         }
-        else if ((pattern[pattern_index] == '[') && use_regular_expressions){
+        else if ((pattern[pattern_index] == OPENING_SQUARE_BRACKET) && use_regular_expressions){
             node = addParsedPatternNode(parsed_pattern ,pattern, SQUARE_BRACKETS, NOT_USED_CHAR,
                                         pattern[pattern_index + 1], pattern[pattern_index + 3]);
             pattern_index += SQUARE_BRACKETS_INNER_SIZE_BYTES;
         }
-        else if ((pattern[pattern_index] == '(') && use_regular_expressions){
-            cut_pattern(pattern, 0, pattern_index);
+        else if ((pattern[pattern_index] == OPENING_ROUND_BRACKET) && use_regular_expressions){
+            cut_pattern_start(pattern, pattern_index + CLOSING_BRACKET_SIZE_BYTES);
             node = addParsedPatternNode(parsed_pattern ,pattern, ROUND_BRACKETS, NOT_USED_CHAR,
                                         NOT_USED_CHAR, NOT_USED_CHAR);
             advance_index_by_round_brackets_flag = 1;

@@ -143,6 +143,7 @@ int find_pattern_in_line(GrepProperties* grep_properties, char* line, ParsedPatt
 		line_size, backtrack_round_brackets;
     ParsedPatternNode* pattern_node;
     char* line_copy = malloc(strlen(line)+1);
+    line_copy[strlen(line)] = '\0';
     strcpy(line_copy, line);
     if(grep_properties->ignore_upper_lower_case){
         to_lower_case(line_copy);
