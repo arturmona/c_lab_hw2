@@ -14,7 +14,7 @@ grep_parcer.o: grep_parcer.c grep_parcer.h
 clean:
 	-rm *.o my_grep
 all:
-	gcc -Wextra -Wall -o my_grep main.c grep.c grep_parcer.c
+	gcc -g -Wextra -Wall -o my_grep main.c grep.c grep_parcer.c
 	chmod 755 my_grep
 test:
 	~nimrodav/grep_tests/run_all.sh

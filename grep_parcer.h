@@ -20,8 +20,8 @@ typedef struct ParsedPatternNode{
     int type;
     char regular_char;
     char** round_brackets_options_array;
-    int number_of_round_brackets_options;
-    int round_brackets_content_size;
+    int number_of_round_brackets_options; 
+    int round_brackets_content_size_bytes;
     int number_of_checked_round_brackets_options;
     char square_brackets_start_char;
     char square_brackets_end_char;
