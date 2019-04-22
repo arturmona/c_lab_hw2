@@ -91,9 +91,6 @@ int search_pattern(ParsedPatternNode** pattern_node, int* matched_chars, char* l
             *matched_chars = ((*pattern_node)->square_brackets_start_char <= line_to_search[(*search_index)] &&
                               (*pattern_node)->square_brackets_end_char >= line_to_search[(*search_index)]);
         } else if ((*pattern_node)->type == ROUND_BRACKETS) {
-			if((*search_index)==-15){
-				exit(EXIT_FAILURE);
-			}
             *matched_chars = check_for_match_in_round_brackets((*pattern_node), 
                                                                 line_to_search+(*search_index));
         }
