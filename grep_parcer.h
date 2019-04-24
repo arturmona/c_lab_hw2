@@ -13,24 +13,24 @@
 #define OFF 0
 #define DASH '-'
 
-typedef struct ParsedPattern{
+typedef struct ParsedPattern {
     int number_of_pattern_nodes;
     struct ParsedPatternNode* start;
     struct ParsedPatternNode* end;
-}ParsedPattern;
+} ParsedPattern;
 
-typedef struct ParsedPatternNode{
+typedef struct ParsedPatternNode {
     int type;
     char regular_char;
     char** round_brackets_options_array;
-    int number_of_round_brackets_options; 
+    int number_of_round_brackets_options;
     int brackets_content_size_bytes;
     int number_of_checked_round_brackets_options;
     char square_brackets_start_char;
     char square_brackets_end_char;
     struct ParsedPatternNode* next;
     struct ParsedPatternNode* prev;
-}ParsedPatternNode;
+} ParsedPatternNode;
 
 void to_lower_case(char* word);
 ParsedPattern* createParsedPattern(char* pattern, int use_regular_expressions);
