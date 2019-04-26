@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define NON_CHOOSEN -1
 #define OPENING_BRACKET_SIZE_BYTES 1
 #define OPENING_SQUARE_BRACKET '['
 #define CLOSING_SQUARE_BRACKET ']'
@@ -197,7 +198,7 @@ int set_parsed_pattern_values(ParsedPattern* parsed_pattern, char* pattern, int 
     ParsedPatternNode* node;
     for (pattern_index = 0; pattern[pattern_index] != '\0'; pattern_index++) {
         advance_index_by_brackets_size_flag = 0;
-        node_type = -1;
+        node_type = NON_CHOOSEN;
         if (pattern[pattern_index] == '\\') {
             if (check_special_chars(pattern[pattern_index + 1])) {
                 pattern_index += 1;
@@ -214,7 +215,7 @@ int set_parsed_pattern_values(ParsedPattern* parsed_pattern, char* pattern, int 
         } else {
             node_type = REGULAR_CHAR;
         }
-        if (node_type >= 0) {
+        if (node_type != NON_CHOOSEN) {
             if (!(node = addParsedPatternNode(parsed_pattern, pattern, node_type, pattern_index))) {
                 return FAILURE;
             }

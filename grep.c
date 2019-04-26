@@ -247,10 +247,6 @@ int grep_on_file(GrepProperties* grep_properties)
     return SUCCESS;
 }
 
-/*
- * we did not split get_grep_properties to several functions
- * because it makes more sencse and it is better understood if keeping it as one.
- */
 void get_grep_properties(GrepProperties* grep_properties, int num_of_args, char** program_arguments)
 {
     int index, pattern_set_flag = 0;
