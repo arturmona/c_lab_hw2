@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #define DOTS ':'
+#define ONE_LINE_LEFT_TO_PRINT -1
 
 typedef struct LinesToGrep {
   char *current_line;
@@ -186,7 +187,7 @@ void grep_line(GrepProperties *program_properties, LinesToGrep *lines, ParsedPat
     return;
   }
   if (found_match) {
-    if (lines->num_of_lines_to_print == -1) {
+    if (lines->num_of_lines_to_print == ONE_LINE_LEFT_TO_PRINT) {
       lines->num_of_lines_to_print = 0;
       printf("--\n");
     }
@@ -197,7 +198,7 @@ void grep_line(GrepProperties *program_properties, LinesToGrep *lines, ParsedPat
   } else if (lines->num_of_lines_to_print > 0) {
     print_matches(program_properties, lines, DASH);
     if (lines->num_of_lines_to_print == 1) {
-      lines->num_of_lines_to_print = 0;
+      lines->num_of_lines_to_print--;
     }
     lines->num_of_lines_to_print--;
   }

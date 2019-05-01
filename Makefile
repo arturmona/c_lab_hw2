@@ -23,10 +23,10 @@ all:
 test:
 	@~nimrodav/grep_tests/run_all.sh
 grep_parcer_test:
-	@gcc $(COMPILATION_FLAGS) -o grep_parcer_test
+	@gcc $(COMPILATION_FLAGS) -o grep_parcer_test grep_parcer_test.c grep_parcer.c
 	@$(SET_AUTHORIZATION) grep_parcer_test
 	@./grep_parcer_test 
 grep_file_test:
-	@gcc $(COMPILATION_FLAGS) -o grep_file_test
+	@gcc $(COMPILATION_FLAGS) -o grep_file_test grep_file_test.c grep_file.c grep_parcer.c
 	@$(SET_AUTHORIZATION) grep_file_test
 	@./grep_file_test 
