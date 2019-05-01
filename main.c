@@ -1,5 +1,6 @@
+#include "grep_file.h"
+#include "grep_parcer.h"
 #include <stdlib.h>
-#include "grep.h"
 
 int main(int argc, char** argv){
     GrepProperties* our_properties = calloc(1, sizeof(GrepProperties));

@@ -243,3 +243,33 @@ ParsedPattern* createParsedPattern(char* pattern, int use_regular_expressions)
     }
     return parsed_pattern;
 }
+
+void get_grep_properties(GrepProperties* grep_properties, int num_of_args, char** program_arguments)
+{
+    int index, pattern_set_flag = 0;
+    for (index = 1; index < num_of_args + 1; index++) {
+        if (!strcmp(program_arguments[index], "-i")) {
+            grep_properties->ignore_upper_lower_case = ON;
+        } else if (!strcmp(program_arguments[index], "-n")) {
+            grep_properties->also_print_line_number = ON;
+        } else if (!strcmp(program_arguments[index], "-A")) {
+            grep_properties->print_num_lines_after_match = atoi(program_arguments[index + 1]);
+            index++;
+        } else if (!strcmp(program_arguments[index], "-b")) {
+            grep_properties->print_file_offset_to_line = ON;
+        } else if (!strcmp(program_arguments[index], "-c")) {
+            grep_properties->only_print_num_of_matched_lines = ON;
+        } else if (!strcmp(program_arguments[index], "-x")) {
+            grep_properties->print_only_strict_match = ON;
+        } else if (!strcmp(program_arguments[index], "-v")) {
+            grep_properties->print_only_lines_not_matching = ON;
+        } else if (!strcmp(program_arguments[index], "-E")) {
+            grep_properties->use_regular_expressions = ON;
+        } else if (!pattern_set_flag) {
+            grep_properties->pattern = program_arguments[index];
+            pattern_set_flag = ON;
+        } else {
+            grep_properties->file_to_read_from = program_arguments[index];
+        }
+    }
+}

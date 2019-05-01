@@ -13,6 +13,19 @@
 #define OFF 0
 #define DASH '-'
 
+typedef struct GrepProperties {
+    char* file_to_read_from;
+    char* pattern;
+    int also_print_line_number;          /*n*/
+    int ignore_upper_lower_case;         /*i*/
+    int print_num_lines_after_match;     /*A NUM*/
+    int print_file_offset_to_line;       /*b*/
+    int only_print_num_of_matched_lines; /*c*/
+    int print_only_strict_match;         /*x*/
+    int print_only_lines_not_matching;   /*v*/
+    int use_regular_expressions;         /*E*/
+} GrepProperties;
+
 typedef struct ParsedPattern {
     int number_of_pattern_nodes;
     struct ParsedPatternNode* start;
@@ -32,6 +45,7 @@ typedef struct ParsedPatternNode {
     struct ParsedPatternNode* prev;
 } ParsedPatternNode;
 
+void get_grep_properties(GrepProperties* grepProperties, int num_of_args, char** program_arguments);
 void to_lower_case(char* word);
 ParsedPattern* createParsedPattern(char* pattern, int use_regular_expressions);
 void freeParsedPattern(ParsedPattern* parsed_pattern);
