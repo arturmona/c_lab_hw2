@@ -6,7 +6,7 @@ my_grep: main.o grep_file.o grep_parcer.o
 	@$(SET_AUTHORIZATION) my_grep
 main.o: main.c grep_file.h grep_parcer.h
 	@gcc $(COMPILATION_FLAGS) -c main.c
-	@chmod 755 main.o  
+	@$(SET_AUTHORIZATION) main.o  
 grep_file.o: grep_file.c grep_file.h grep_parcer.h
 	@gcc $(COMPILATION_FLAGS) -c grep_file.c
 	@$(SET_AUTHORIZATION) grep_file.o 
