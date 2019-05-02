@@ -28,7 +28,7 @@ int check_special_chars(char char_to_check)
 {
   if ((char_to_check == DELIMITER_CHAR) || (char_to_check == DOT_SIGN) || (char_to_check == OPENING_SQUARE_BRACKET) ||
       (char_to_check == CLOSING_SQUARE_BRACKET) || (char_to_check == OPENING_ROUND_BRACKET) ||
-	  (char_to_check == CLOSING_ROUND_BRACKET) || (char_to_check == OPENING_CURVED_BRACKET) ||
+      (char_to_check == CLOSING_ROUND_BRACKET) || (char_to_check == OPENING_CURVED_BRACKET) ||
       (char_to_check == CLOSING_CURVED_BRACKET)) {
     return FOUND;
   }

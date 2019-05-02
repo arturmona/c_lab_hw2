@@ -7,13 +7,30 @@
 
 #define VALID_RESULT 1
 #define INVALID_RESULT 0
+#define IGNORE_ARGUMENT -1
+#define INDEX_ZERO 0
+#define INDEX_ONE 1
+#define INDEX_TWO 2
+#define INDEX_THREE 3
+#define INDEX_FOUR 4
+#define INDEX_FIVE 5
+#define INDEX_SIX 6
+#define INDEX_SIX 6
+#define INDEX_SEVEN 7
+#define INDEX_EIGHT 8
+#define ARRAY_SIZE 15
+#define DESIRE_VALID_FLAGS_OF_TEST_GREP_ON_FILE 4
+#define INPUT_FILE_PATH "/specific/a/home/cc/students/cs/danielpeer/bbb/tests/input.txt"
+#define OUTPUT_FILE_PATH "/specific/a/home/cc/students/cs/danielpeer/bbb/tests/output.txt"
+#define NUM_OF_ARGS 4
 
-void init_array(char** array, char* argument1, int index1, char* argument2, int index2, char* argument3, int index3)
+void init_array(char** array, char* first_argument, int first_argument_index, char* second_argument,
+                int second_argument_index, char* third_argument, int third_argument_index)
 {
-  array[index1] = argument1;
-  array[index2] = argument2;
-  if (index3 != -1) {
-    array[index3] = argument3;
+  array[first_argument_index] = first_argument;
+  array[second_argument_index] = second_argument;
+  if (third_argument_index != IGNORE_ARGUMENT) {
+    array[third_argument_index] = third_argument;
   }
 }
 
@@ -23,7 +40,7 @@ void free_array(char** array, int index_pattern)
   free(array);
 }
 
-int reset_grep_properties(GrepProperties* grep_properties)
+void reset_grep_properties(GrepProperties* grep_properties)
 {
   grep_properties->file_to_read_from = NULL;
   grep_properties->pattern = NULL;
@@ -37,15 +54,16 @@ int reset_grep_properties(GrepProperties* grep_properties)
   grep_properties->print_num_lines_after_match = 0;
 }
 
-int check_grep_on_file_prints(GrepProperties* grep, char* array, char** temp, int size, char* expected_chars)
+int check_grep_on_file_prints(GrepProperties* grep, char* array, char** arguments, int num_of_args,
+                              char* expected_chars)
 {
   FILE* file;
-  file = freopen("tests/output.txt", "w+", stdout);
-  get_grep_properties(grep, size, temp);
+  file = freopen(OUTPUT_FILE_PATH, "w+", stdout);
+  get_grep_properties(grep, num_of_args, arguments);
   grep_on_file(grep);
   fclose(file);
-  file = freopen("tests/output.txt", "r", stdout);
-  fgets(array, 60, file);
+  file = freopen(OUTPUT_FILE_PATH, "r", stdout);
+  fgets(array, ARRAY_SIZE, file);
   if (strcmp(expected_chars, array) != 0) {
     return INVALID_RESULT;
   }
@@ -54,31 +72,35 @@ int check_grep_on_file_prints(GrepProperties* grep, char* array, char** temp, in
 
 void test_grep_on_file()
 {
-  char result[60];
+  char result[ARRAY_SIZE];
   int num_of_valid_results = 0;
   GrepProperties grep;
-  char** array_of_arguments = calloc(5, sizeof(char*));
-  array_of_arguments[1] = calloc(8, sizeof(char));
-  array_of_arguments[0] = "Program";
-  strcpy(array_of_arguments[1], "bla");
-  init_array(array_of_arguments, "-i", 2, "tests/input.txt", 3, NULL, -1);
+  char** array_of_arguments = calloc(ARRAY_SIZE, sizeof(char*));
+  array_of_arguments[INDEX_ONE] = calloc(ARRAY_SIZE, sizeof(char));
+  array_of_arguments[INDEX_ZERO] = "Program";
+  strcpy(array_of_arguments[INDEX_ONE], "bla");
+  init_array(array_of_arguments, "-i", INDEX_TWO, INPUT_FILE_PATH, INDEX_THREE, "-x", INDEX_FOUR);
   reset_grep_properties(&grep);
-  num_of_valid_results += check_grep_on_file_prints(&grep, result, array_of_arguments, 3, "Bla\n");
-  free(array_of_arguments[1]);
-  init_array(array_of_arguments, "-E", 1, "-x", 3, "tests/input.txt", 4);
-  array_of_arguments[2] = calloc(8, sizeof(char));
-  strcpy(array_of_arguments[2], "Bl[a-c]");
+  num_of_valid_results += check_grep_on_file_prints(&grep, result, array_of_arguments, NUM_OF_ARGS, "Bla\n");
+  free(array_of_arguments[INDEX_ONE]);
+  init_array(array_of_arguments, "-E", INDEX_ONE, "-x", INDEX_THREE, INPUT_FILE_PATH, INDEX_FOUR);
+  array_of_arguments[INDEX_TWO] = calloc(ARRAY_SIZE, sizeof(char));
+  strcpy(array_of_arguments[INDEX_TWO], "Bl[a-c]");
   reset_grep_properties(&grep);
-  num_of_valid_results += check_grep_on_file_prints(&grep, result, array_of_arguments, 4, "Bla\n");
-  init_array(array_of_arguments, "-E", 1, "-v", 3, "tests/input.txt", 4);
-  strcpy(array_of_arguments[2], ".la");
+  num_of_valid_results += check_grep_on_file_prints(&grep, result, array_of_arguments, NUM_OF_ARGS, "Bla\n");
+  init_array(array_of_arguments, "-E", INDEX_ONE, "-v", INDEX_THREE, INPUT_FILE_PATH, INDEX_FOUR);
+  strcpy(array_of_arguments[INDEX_TWO], ".la");
   reset_grep_properties(&grep);
-  num_of_valid_results += check_grep_on_file_prints(&grep, result, array_of_arguments, 4, "daniel");
-  array_of_arguments[3] = "-c";
+  num_of_valid_results += check_grep_on_file_prints(&grep, result, array_of_arguments, NUM_OF_ARGS, "daniel");
+  array_of_arguments[INDEX_THREE] = "-c";
   reset_grep_properties(&grep);
-  num_of_valid_results += check_grep_on_file_prints(&grep, result, array_of_arguments, 4, "1\n");
-  free_array(array_of_arguments, 2);
-  assert(num_of_valid_results == 4 && "test_grep_on_file()");
+  num_of_valid_results += check_grep_on_file_prints(&grep, result, array_of_arguments, NUM_OF_ARGS, "1\n");
+  free_array(array_of_arguments, INDEX_TWO);
+  assert(num_of_valid_results == DESIRE_VALID_FLAGS_OF_TEST_GREP_ON_FILE && "test_grep_on_file()");
 }
 
-int main() { test_grep_on_file(); }
+int main()
+{
+  test_grep_on_file();
+  return EXIT_SUCCESS;
+}
