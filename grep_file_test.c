@@ -20,8 +20,8 @@
 #define INDEX_EIGHT 8
 #define ARRAY_SIZE 15
 #define DESIRE_VALID_FLAGS_OF_TEST_GREP_ON_FILE 4
-#define INPUT_FILE_PATH "/specific/a/home/cc/students/cs/danielpeer/bbb/tests/input.txt"
-#define OUTPUT_FILE_PATH "/specific/a/home/cc/students/cs/danielpeer/bbb/tests/output.txt"
+#define INPUT_FILE_PATH "/specific/a/home/cc/students/cs/arturm/c_lab/ex2/tests/input.txt"
+#define OUTPUT_FILE_PATH "/specific/a/home/cc/students/cs/arturm/c_lab/ex2/tests/output.txt"
 #define NUM_OF_ARGS 4
 
 void init_array(char** array, char* first_argument, int first_argument_index, char* second_argument,

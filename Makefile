@@ -7,7 +7,7 @@ my_grep: main.o grep_file.o grep_parcer.o
 main.o: main.c grep_file.h grep_parcer.h
 	@gcc $(COMPILATION_FLAGS) -c main.c
 	@$(SET_AUTHORIZATION) main.o  
-grep_file.o: grep_file.c grep_file.h grep_parcer.h
+grep_file.o: grep_file.c grep_file.h
 	@gcc $(COMPILATION_FLAGS) -c grep_file.c
 	@$(SET_AUTHORIZATION) grep_file.o 
 grep_parcer.o: grep_parcer.c grep_parcer.h
